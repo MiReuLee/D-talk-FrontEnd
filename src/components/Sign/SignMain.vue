@@ -4,7 +4,7 @@
             class="title"
             :class="{ right: ty === 1 }"
         >
-            <img src="img/logo.svg" alt="logo">
+            <img src="@/assets/img/logo.svg" alt="logo">
             <p v-if="ty === 0">아직 회원이 아니신가요? <button @click="ty = 1">회원가입 하기</button></p>
             <p v-else-if="ty === 1">이미 회원이신가요? <button @click="ty = 0">로그인 하기</button></p>
         </section>
@@ -14,11 +14,13 @@
         >
             <h1>로그인</h1>
             <input
+                v-model="id1"
                 name="id"
                 placeholder="아이디"
             >
             <div class="pw-wrap">
                 <input
+                    v-model="pw1"
                     name="pw"
                     placeholder="비밀번호"
                     :type="isShowPw1 ? 'text' : 'password'"
@@ -29,7 +31,7 @@
                 <input type="checkbox">
                 <span>아이디 저장</span>
             </label>
-            <button class="confirm">로그인</button>
+            <button class="confirm" @click="signIn">로그인</button>
         </section>
         <section
             v-show="ty === 1"
@@ -67,10 +69,15 @@ import { signUp, signIn } from '@/util/api';
 export default defineComponent({
     setup() {
         const ty = ref(0);
+
         // 로그인 시 비밀번호 Show 여부
         const isShowPw1 = ref(false);
+        const id1 = ref('');
+        const pw1 = ref('');
+
         // 회원가입 시 비밀번호 Show 여부
         const isShowPw2 = ref(false);
+
         const id2 = ref('');
         const pw2 = ref('');
         const nickname = ref('');
@@ -84,6 +91,9 @@ export default defineComponent({
             nickname,
             async signUp() {
                 await signUp(id2.value, pw2.value, nickname.value);
+            },
+            async signIn() {
+                await signIn(id1.value, pw1.value);
             }
         };
     }
