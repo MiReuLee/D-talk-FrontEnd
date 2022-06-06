@@ -28,7 +28,10 @@
                 <button @click="isShowPw1 = !isShowPw1">show</button>
             </div>
             <label>
-                <input type="checkbox">
+                <input
+                    v-model="idSave"
+                    type="checkbox"
+                >
                 <span>아이디 저장</span>
             </label>
             <button class="confirm" @click="signIn">로그인</button>
@@ -64,16 +67,22 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import Cookies from 'js-cookie';
 import { signUp, signIn } from '@/util/api';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
     setup() {
+        const router = useRouter();
+
         const ty = ref(0);
 
         // 로그인 시 비밀번호 Show 여부
         const isShowPw1 = ref(false);
-        const id1 = ref('');
+
+        const id1 = ref(localStorage.getItem('id') || '');
         const pw1 = ref('');
+        const idSave = ref(localStorage.getItem('idSave') === 'true');
 
         // 회원가입 시 비밀번호 Show 여부
         const isShowPw2 = ref(false);
@@ -86,21 +95,35 @@ export default defineComponent({
             ty,
             isShowPw1,
             isShowPw2,
+            id1,
+            pw1,
+            idSave,
             id2,
             pw2,
             nickname,
             async signUp() {
                 await signUp(id2.value, pw2.value, nickname.value);
+                const token = await signIn(id2.value, pw2.value);
+
+                Cookies.set('token', `${token}`);
+
+                router.push({ name: 'Lobby' });
             },
             async signIn() {
-                await signIn(id1.value, pw1.value);
+                const token = await signIn(id1.value, pw1.value);
+
+                Cookies.set('token', `${token}`);
+                localStorage.setItem('idSave', `${idSave.value}`);
+                localStorage.setItem('id', idSave.value ? `${id1.value}` : '');
+
+                router.push({ name: 'Lobby' });
             }
         };
     }
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     article {
         display: flex;
         height: 395px;

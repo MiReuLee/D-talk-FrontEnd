@@ -7,7 +7,7 @@ module.exports = defineConfig({
     configureWebpack: {
         resolve: {
             alias: {
-                img: path.join(__dirname, 'src/assets/img')
+                img: path.join(__dirname, 'src/assets/img/')
             }
         }
     }

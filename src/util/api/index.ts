@@ -4,7 +4,20 @@ const instance = axios.create({
     baseURL: 'http://localhost:8080'
 });
 
-instance.interceptors.response.use(res => res.data);
+instance.interceptors.response.use(
+    res => res.data,
+    e => {
+        const { data } = e.response;
+
+        if (data.errors) {
+            alert(data.errors[0].defaultMessage);
+        } else {
+            alert(data.message);
+        }
+
+        throw e;
+    }
+);
 
 const get = async (url: string, params?: any) => {
     const result = await instance.get(url, { params });

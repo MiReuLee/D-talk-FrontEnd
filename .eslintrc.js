@@ -17,6 +17,8 @@ module.exports = {
         'comma-dangle': ['error', 'never'],
         'vuejs-accessibility/form-control-has-label': 0,
         'vuejs-accessibility/label-has-for': 0,
-        'arrow-parens': 0
+        'arrow-parens': 0,
+        'no-alert': 0,
+        'no-console': 0
     }
 };
