@@ -10,6 +10,16 @@ const routes: Array<RouteRecordRaw> = [
         path: '/sign',
         name: 'Sign',
         component: () => import('../components/Sign/SignMain.vue')
+    },
+    {
+        path: '/draw',
+        name: 'DrawWorkspace',
+        component: () => import('../components/Workspace/DrawWorkspace.vue')
+    },
+    {
+        path: '/friend',
+        name: 'Friend',
+        component: () => import('../components/Friend/FriendMain.vue')
     }
 ];
 

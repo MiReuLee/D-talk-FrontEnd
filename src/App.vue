@@ -30,6 +30,7 @@ html, body {
         display: flex;
         height: 100%;
         align-items: center;
+        justify-content: center;
 
         > * {
             flex: 1;
