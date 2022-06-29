@@ -2,16 +2,26 @@
     <article class="wrap">
         <section class="header">
             <router-link to="/" />
+            <router-link class="home" to="/" />
         </section>
-        <section>
+        <div class="contents">
             <!-- 조회 -->
-            <article>
+            <section class="left">
                 <input
                     v-model="findUserId"
                     @change="findUser"
                 >
-            </article>
-        </section>
+                <button
+                    v-if="findUserInfo"
+                    @click="friendRequest"
+                >
+                    <img alt="">
+                    <span v-text="findUserInfo.nickname" />
+                </button>
+            </section>
+            <section class="right">
+            </section>
+        </div>
     </article>
     <!-- 조회 -->
     <!-- <article>
@@ -28,17 +38,26 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import { findUser } from '@/util/api';
+import { defineComponent, Ref, ref } from 'vue';
+import { findUser, friendRequest } from '@/util/api';
 
 export default defineComponent({
     setup() {
         const findUserId = ref('');
+        const findUserInfo: Ref<any> = ref(null);
 
         return {
             findUserId,
+            findUserInfo,
             async findUser() {
-                await findUser(findUserId.value);
+                try {
+                    findUserInfo.value = await findUser(findUserId.value);
+                } catch {
+                    findUserInfo.value = null;
+                }
+            },
+            async friendRequest() {
+                await friendRequest(findUserInfo.value?.idx);
             }
         };
     }
@@ -52,9 +71,11 @@ export default defineComponent({
         max-width: 852px;
 
         .header {
-            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
             height: 50px;
-            margin-bottom: 30px;
+            margin-bottom: 113px;
 
             a {
                 display: inline-block;
@@ -63,6 +84,64 @@ export default defineComponent({
                 background: url('img/workspace/ic_back_green01.svg') center no-repeat;
                 background-color: #DBFAF5;
                 border-radius: 16px;
+
+                &.home {
+                    width: 145px;
+                    height: 85px;
+                    background: url('img/logo.svg');
+                }
+            }
+        }
+
+        .contents {
+            display: flex;
+            height: 455px;
+
+            .left {
+                width: 328px;
+                height: 100%;
+                border: 5px solid #4BD2B5;
+                border-radius: 20px;
+                padding: 12px;
+
+                input {
+                    width: 100%;
+                    height: 48px;
+                    font-weight: bold;
+                    font-size: 18px;
+                    color: #fff;
+                    background: #41C7AE;
+                    border: none;
+                    border-radius: 24px;
+                    outline: none;
+                    padding: 0 25px;
+                    box-sizing: border-box;
+                    margin-bottom: 12px;
+                }
+
+                button {
+                    display: flex;
+                    align-items: center;
+                    width: 100%;
+                    background: #3CDAC1;
+                    border-radius: 20px;
+                    padding: 8px;
+                    border: none;
+                    cursor: pointer;
+
+                    img {
+                        width: 49px;
+                        height: 49px;
+                        border-radius: 16px;
+                        margin-right: 16px;
+                    }
+
+                    span {
+                        font-weight: bold;
+                        font-size: 18px;
+                        color: #047068;
+                    }
+                }
             }
         }
     }
