@@ -17,9 +17,46 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../components/Workspace/DrawWorkspace.vue')
     },
     {
+        path: '/profile',
+        component: () => import('../components/Profile/ProfileMain.vue'),
+        children: [
+            {
+                path: '',
+                name: 'MyInfo',
+                component: () => import('../components/Profile/MyInfo.vue')
+            },
+            {
+                path: '',
+                name: 'Gallery',
+                component: () => import('../components/Profile/QuizGallery.vue')
+            },
+            {
+                path: '',
+                name: 'Option',
+                component: () => import('../components/Profile/MyOption.vue')
+            }
+        ]
+    },
+    {
         path: '/friend',
-        name: 'Friend',
-        component: () => import('../components/Friend/FriendMain.vue')
+        component: () => import('../components/Friend/FriendMain.vue'),
+        children: [
+            {
+                path: '',
+                name: 'MyFriend',
+                component: () => import('../components/Friend/MyFriend.vue')
+            },
+            {
+                path: 'recommend',
+                name: 'RecommendFriend',
+                component: () => import('../components/Friend/MyFriend.vue')
+            },
+            {
+                path: 'receive',
+                name: 'FriendReceive',
+                component: () => import('../components/Friend/FriendReceive.vue')
+            }
+        ]
     }
 ];
 
