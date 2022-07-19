@@ -2,7 +2,10 @@
     <article class="wrap">
         <div class="header">
             <router-link to="/" />
-            <input placeholder="단어">
+            <input
+                v-model="keyword"
+                placeholder="단어"
+            >
         </div>
         <canvas
             ref="canvas"
@@ -48,12 +51,16 @@
                     <button />
                 </div>
             </div>
-            <button class="send">보내기</button>
+            <button
+                class="send"
+                @click="submit"
+            >보내기</button>
         </div>
     </article>
 </template>
 
 <script lang="ts">
+import { saveQuiz } from '@/util/api';
 import {
     defineComponent, onMounted, onUnmounted, Ref, ref
 } from 'vue';
@@ -106,7 +113,15 @@ export default defineComponent({
         let startX = 0;
         let startY = 0;
 
+        const drawStartTime = new Date().getTime();
+
+        const keyword = ref('');
+
+        // eslint-disable-next-line max-len
+        const drawData: { x: number; y: number; pen: number; color: number[]; time: number; }[] = [];
+
         return {
+            keyword,
             canvas,
             penTy,
             colorArr,
@@ -179,7 +194,23 @@ export default defineComponent({
                         .lineTo(currX, currY);
 
                     stage.update();
+
+                    drawData.push({
+                        x: currX,
+                        y: currY,
+                        pen: penTy.value,
+                        color,
+                        time: new Date().getTime() - drawStartTime
+                    });
                 }
+            },
+            async submit() {
+                await saveQuiz({
+                    keyword: keyword.value,
+                    thumbImg: '',
+                    detail: JSON.stringify(drawData),
+                    sec: 10
+                });
             }
         };
     }
@@ -326,6 +357,7 @@ export default defineComponent({
                             height: 100%;
                             background: #86D5C2;
                             border: none;
+                            margin: 0;
                         }
                     }
                 }
@@ -349,6 +381,8 @@ export default defineComponent({
                 background-image: linear-gradient(to bottom, #ffa8a8 0%, #ff77b5 100%);
                 background-size: contain;
                 border: 4px solid #BFF7EB;
+                cursor: pointer;
+                margin-right: 0;
             }
         }
     }

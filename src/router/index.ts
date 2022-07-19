@@ -26,12 +26,12 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('../components/Profile/MyInfo.vue')
             },
             {
-                path: '',
+                path: 'gallery',
                 name: 'Gallery',
                 component: () => import('../components/Profile/QuizGallery.vue')
             },
             {
-                path: '',
+                path: 'option',
                 name: 'Option',
                 component: () => import('../components/Profile/MyOption.vue')
             }
