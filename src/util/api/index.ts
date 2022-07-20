@@ -76,3 +76,5 @@ export const getQuizCnt = () => get('quiz/count', null, null, true);
 export const getFriendCnt = () => get('friend/count', null, null, true);
 
 export const saveQuiz = (data: any) => post('quiz', data, null, null, true);
+
+export const sendQuiz = (quizIdx: number, userIdx: number) => post('quiz/quiz/send', { quizIdx, userIdx }, null, null, true);

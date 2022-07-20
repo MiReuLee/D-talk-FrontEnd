@@ -57,6 +57,12 @@
             >보내기</button>
         </div>
     </article>
+    <suspense>
+        <friend-modal
+            v-if="isShowFriendModal"
+            :quiz-idx="quizIdx"
+        />
+    </suspense>
 </template>
 
 <script lang="ts">
@@ -64,10 +70,14 @@ import { saveQuiz } from '@/util/api';
 import {
     defineComponent, onMounted, onUnmounted, Ref, ref
 } from 'vue';
+import FriendModal from './FriendModal.vue';
 
 const { createjs } = window as any;
 
 export default defineComponent({
+    components: {
+        FriendModal
+    },
     setup() {
         const colorArr = [
             [0, 0, 0],
@@ -119,6 +129,9 @@ export default defineComponent({
 
         // eslint-disable-next-line max-len
         const drawData: { x: number; y: number; pen: number; color: number[]; time: number; }[] = [];
+
+        const isShowFriendModal = ref(false);
+        const quizIdx = ref(0);
 
         return {
             keyword,
@@ -204,13 +217,17 @@ export default defineComponent({
                     });
                 }
             },
+            isShowFriendModal,
+            quizIdx,
             async submit() {
-                await saveQuiz({
+                quizIdx.value = Number(await saveQuiz({
                     keyword: keyword.value,
                     thumbImg: '',
                     detail: JSON.stringify(drawData),
                     sec: 10
-                });
+                }));
+
+                isShowFriendModal.value = true;
             }
         };
     }
