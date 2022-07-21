@@ -4,6 +4,33 @@
     </main>
 </template>
 
+<script lang="ts">
+import { defineComponent } from 'vue';
+import { getMe } from '@/util/api';
+
+export default defineComponent({
+    data() {
+        return {
+            isInit: false
+        };
+    },
+    watch: {
+        $route: 'init'
+    },
+    methods: {
+        async init() {
+            if (!this.isInit && this.$route.name !== 'Sign') {
+                const a = await getMe();
+
+                console.log(a);
+
+                this.isInit = true;
+            }
+        }
+    }
+});
+</script>
+
 <style lang="scss">
 html {
     font-family: Avenir, Helvetica, Arial, sans-serif;

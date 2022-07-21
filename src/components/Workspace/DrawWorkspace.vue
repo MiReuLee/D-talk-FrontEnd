@@ -2,7 +2,10 @@
     <article class="wrap">
         <div class="header">
             <router-link to="/" />
-            <input placeholder="단어">
+            <input
+                v-model="keyword"
+                placeholder="단어"
+            >
         </div>
         <canvas
             ref="canvas"
@@ -12,30 +15,97 @@
             @mousemove="draw"
         />
         <div class="footer">
-            <button>브러쉬</button>
-            <button>붓글씨</button>
-            <button>수채화</button>
-            <button>마커</button>
+            <button
+                :class="{ active: penTy === 0 }"
+                @click="setPen(0)"
+            />
+            <button
+                :class="{ active: penTy === 1 }"
+                @click="setPen(1)"
+            />
+            <button
+                :class="{ active: penTy === 2 }"
+                @click="setPen(2)"
+            />
+            <button
+                :class="{ active: penTy === 3 }"
+                @click="setPen(3)"
+            />
+            <button
+                :class="{ active: penTy === 4 }"
+                @click="setPen(4)"
+            />
+            <div>
+                <div>
+                    <button />
+                    <div>
+                        <button
+                            v-for="(c, i) in colorArr"
+                            :key="i"
+                            :style="{ background: `rgb(${c.join()})` }"
+                            @click="setColor(i)"
+                        />
+                    </div>
+                </div>
+                <div>
+                    <button />
+                </div>
+            </div>
+            <button
+                class="send"
+                @click="submit"
+            >보내기</button>
         </div>
     </article>
+    <suspense>
+        <friend-modal
+            v-if="isShowFriendModal"
+            :quiz-idx="quizIdx"
+        />
+    </suspense>
 </template>
 
 <script lang="ts">
+import { saveQuiz } from '@/util/api';
 import {
     defineComponent, onMounted, onUnmounted, Ref, ref
 } from 'vue';
+import FriendModal from './FriendModal.vue';
+
+const { createjs } = window as any;
 
 export default defineComponent({
+    components: {
+        FriendModal
+    },
     setup() {
+        const colorArr = [
+            [0, 0, 0],
+            [127, 127, 127],
+            [136, 0, 21],
+            [237, 28, 37],
+            [255, 127, 39],
+            [255, 243, 2],
+            [34, 177, 76],
+            [4, 161, 232],
+            [63, 72, 203],
+            [163, 73, 164]
+        ];
+        let color = colorArr[0];
+
+        let stage: any;
+        let shape: any;
+
         const canvas: Ref<HTMLCanvasElement | null> = ref(null);
-        let ctx: CanvasRenderingContext2D | null;
         let isCanvasFocus = false;
+
+        const penTy = ref(0);
 
         const drawEnd = () => { isCanvasFocus = false; };
 
         onMounted(() => {
             if (canvas.value) {
-                ctx = canvas.value.getContext('2d');
+                stage = new createjs.Stage(canvas.value);
             }
 
             window.addEventListener('mouseup', drawEnd);
@@ -45,7 +115,6 @@ export default defineComponent({
             window.removeEventListener('mouseup', drawEnd);
         });
 
-        let test = false;
         const getRand = (
             min: number,
             max: number
@@ -54,48 +123,111 @@ export default defineComponent({
         let startX = 0;
         let startY = 0;
 
+        const drawStartTime = new Date().getTime();
+
+        const keyword = ref('');
+
+        // eslint-disable-next-line max-len
+        const drawData: { x: number; y: number; pen: number; color: number[]; time: number; }[] = [];
+
+        const isShowFriendModal = ref(false);
+        const quizIdx = ref(0);
+
         return {
+            keyword,
             canvas,
+            penTy,
+            colorArr,
+            setColor(idx: number) {
+                color = colorArr[idx];
+            },
+            setPen(pen: number) {
+                penTy.value = pen;
+            },
             drawStart(evt: MouseEvent) {
-                if (ctx) {
-                    isCanvasFocus = true;
+                startX = evt.offsetX;
+                startY = evt.offsetY;
 
-                    startX = evt.offsetX;
-                    startY = evt.offsetY;
+                shape = new createjs.Shape();
+                stage.addChild(shape);
 
-                    ctx.beginPath();
-                    ctx.moveTo(startX, startY);
-
-                    ctx.lineCap = 'round';
-                    // ctx.lineCap = 'square';
-                    ctx.lineWidth = 25;
-                    ctx.globalAlpha = 0.5;
-                    // ctx.globalCompositeOperation = 'lighter';
-                    // ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
-
-                    ctx.lineTo(startX, startY);
-                    ctx.stroke();
+                switch (penTy.value) {
+                    case 0: {
+                        shape.graphics
+                            .beginStroke(`rgb(${color.join()})`);
+                        break;
+                    }
+                    case 1: {
+                        shape.graphics
+                            .setStrokeStyle(10)
+                            .beginStroke(`rgb(${color.join()})`);
+                        break;
+                    }
+                    case 2: {
+                        shape.graphics
+                            .beginStroke(`rgb(${color.join()})`);
+                        break;
+                    }
+                    case 3: {
+                        shape.graphics
+                            .setStrokeStyle(25, 'round')
+                            .beginStroke(`rgba(${color.join()}, 0.5)`);
+                        break;
+                    }
+                    case 4: {
+                        shape.graphics
+                            .setStrokeStyle(20)
+                            .beginStroke('#fff');
+                        break;
+                    }
+                    default:
                 }
+
+                shape.graphics
+                    .moveTo(startX, startY)
+                    .lineTo(startX, startY);
+
+                stage.update();
+
+                isCanvasFocus = true;
             },
             draw(evt: MouseEvent) {
-                if (isCanvasFocus && ctx) {
+                if (isCanvasFocus) {
                     const currX = evt.offsetX;
                     const currY = evt.offsetY;
 
-                    // ctx.lineWidth = 10;
+                    // let lineWidth = 10;
 
-                    // ctx.lineWidth /= Math.max(Math.min(
+                    // lineWidth /= Math.max(Math.min(
                     //     Math.abs(currX - startX),
                     //     Math.abs(currY - startY)
                     // ) / 100, 1);
 
-                    // console.log(Math.min(Math.abs(currX - startX), Math.abs(currY - startY)));
-                    // console.log(ctx.lineWidth);
+                    shape.graphics
+                        .lineTo(currX, currY);
 
-                    ctx.beginPath();
-                    ctx.lineTo(currX, currY);
-                    ctx.stroke();
+                    stage.update();
+
+                    drawData.push({
+                        x: currX,
+                        y: currY,
+                        pen: penTy.value,
+                        color,
+                        time: new Date().getTime() - drawStartTime
+                    });
                 }
+            },
+            isShowFriendModal,
+            quizIdx,
+            async submit() {
+                quizIdx.value = Number(await saveQuiz({
+                    keyword: keyword.value,
+                    thumbImg: '',
+                    detail: JSON.stringify(drawData),
+                    sec: 10
+                }));
+
+                isShowFriendModal.value = true;
             }
         };
     }
@@ -144,10 +276,131 @@ export default defineComponent({
         canvas {
             background: #fff;
             border-radius: 30px;
+            margin-bottom: 10px;
         }
 
         .footer {
+            display: flex;
 
+            > button {
+                position: relative;
+                width: 72px;
+                height: 72px;
+                background-color: #2DBBA7;
+                background-size: 50px 50px;
+                background-position: center;
+                background-repeat: no-repeat;
+                border: 9px solid #35D0BA;
+                border-radius: 20px;
+                margin-right: 5px;
+                vertical-align: middle;
+
+                &.active {
+                    &::after {
+                        content: '';
+                        position: absolute;
+                        width: 80px;
+                        height: 80px;
+                        left: -13px;
+                        top: -13px;
+                        border: 8px solid #D5FAF7;
+                        border-radius: 20px;
+                        box-sizing: border-box;
+                    }
+                }
+
+                &:nth-child(1) {
+                    background-image: url('img/workspace/ic_pen01.svg');
+                }
+
+                &:nth-child(2) {
+                    background-image: url('img/workspace/ic_pen02.svg');
+                }
+
+                &:nth-child(3) {
+                    display: none;
+                    background-image: url('img/workspace/ic_pen03.svg');
+                }
+
+                &:nth-child(4) {
+                    background-image: url('img/workspace/ic_pen04.svg');
+                }
+
+                &:nth-child(5) {
+                    background-image: url('img/workspace/ic_eraser.svg');
+                }
+            }
+
+            > div {
+                display: inline-flex;
+                align-items: center;
+                height: 72px;
+                background-color: #35D0BA;
+                border-radius: 20px;
+                vertical-align: middle;
+                box-sizing: border-box;
+                padding: 9px;
+                margin-right: 5px;
+
+                > div {
+                    height: 100%;
+                    background: #2DBBA7;
+                    border-radius: 20px;
+                    margin-right: 5px;
+
+                    &:first-child {
+                        height: 100%;
+                        display: flex;
+                        align-items: center;
+                        padding: 0 10px;
+
+                        > {
+                            button {
+                                width: 52px;
+                                height: 42px;
+                                background: url('img/workspace/ic_palette.svg') center no-repeat;
+                                border: none;
+                                margin-right: 12px;
+                            }
+                        }
+                    }
+
+                    &:last-child {
+                        padding: 7px 6px;
+                        box-sizing: border-box;
+
+                        button {
+                            width: 20px;
+                            height: 100%;
+                            background: #86D5C2;
+                            border: none;
+                            margin: 0;
+                        }
+                    }
+                }
+
+                > div {
+                    button {
+                        width: 20px;
+                        height: 20px;
+                        border: 2px solid #000;
+                        border-radius: 3px;
+                        margin-right: 3px;
+                    }
+                }
+            }
+
+            .send {
+                flex: 1;
+                font-weight: bold;
+                font-size: 22px;
+                color: #fff;
+                background-image: linear-gradient(to bottom, #ffa8a8 0%, #ff77b5 100%);
+                background-size: contain;
+                border: 4px solid #BFF7EB;
+                cursor: pointer;
+                margin-right: 0;
+            }
         }
     }
 </style>

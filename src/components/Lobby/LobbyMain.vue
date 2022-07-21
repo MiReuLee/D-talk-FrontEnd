@@ -4,7 +4,7 @@
             <div>
                 <router-link
                     class="profile"
-                    to="/"
+                    :to="{ name: 'MyInfo' }"
                 />
             </div>
             <div>
@@ -16,7 +16,7 @@
             <div>
                 <router-link
                     class="friend"
-                    :to="{ name: 'Friend' }"
+                    :to="{ name: 'MyFriend' }"
                 />
                 <router-link
                     class="setting"

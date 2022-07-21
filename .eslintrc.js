@@ -12,7 +12,7 @@ module.exports = {
         ecmaVersion: 2020
     },
     rules: {
-        indent: ['error', 4],
+        indent: ['error', 4, { SwitchCase: 1 }],
         'vue/html-indent': ['error', 4],
         'comma-dangle': ['error', 'never'],
         'vuejs-accessibility/form-control-has-label': 0,
